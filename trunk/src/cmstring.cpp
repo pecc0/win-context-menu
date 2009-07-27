@@ -1,5 +1,5 @@
 #include "cmstring.h"
-
+#include "regexp/regexp/Pattern.h"
 ContextMenuString& ContextMenuString::operator = (const char * copy) {
 	assign( copy, (size_type)strlen(copy));
 	return *this;
@@ -19,7 +19,6 @@ ContextMenuString::size_type ContextMenuString::rfind(char tofind)
 
 ContextMenuString ContextMenuString::substring(int start, int end) 
 {
-
 	if (start < 0 || start > end) {
 		return ContextMenuString();
 	}
@@ -32,3 +31,7 @@ ContextMenuString ContextMenuString::substring(int start, int end)
 	delete[] buf;
 	return result;
 }
+
+	bool ContextMenuString::matches(const ContextMenuString& regexp){
+         return Pattern::matches(regexp.data(), this->data());
+ }
