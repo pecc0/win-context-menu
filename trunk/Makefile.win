@@ -1,0 +1,64 @@
+# Project: win_context_menu
+# Makefile created by Dev-C++ 4.9.9.2
+
+CPP  = g++.exe
+CC   = gcc.exe
+WINDRES = windres.exe
+RES  = 
+OBJ  = src/ItemIDList.o src/wscitecm.o src/tinyxml/tinystr.o src/tinyxml/tinyxml.o src/tinyxml/tinyxmlerror.o src/tinyxml/tinyxmlparser.o src/cmsettings.o src/regexp/Matcher.o src/regexp/Pattern.o src/regexp/WCMatcher.o src/regexp/WCPattern.o $(RES)
+LINKOBJ  = src/ItemIDList.o src/wscitecm.o src/tinyxml/tinystr.o src/tinyxml/tinyxml.o src/tinyxml/tinyxmlerror.o src/tinyxml/tinyxmlparser.o src/cmsettings.o src/regexp/Matcher.o src/regexp/Pattern.o src/regexp/WCMatcher.o src/regexp/WCPattern.o $(RES)
+LIBS =  -L"D:/Dev-Cpp/lib" --add-stdcall-alias  --export-all-symbols -lole32 -lshlwapi -luuid  
+INCS = 
+CXXINCS =  -I"D:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"D:/Dev-Cpp/include/c++/3.4.2/bits"  -I"D:/Dev-Cpp/include/c++/3.4.2/backward"  -I"D:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"D:/Dev-Cpp/include/c++/3.4.2"  -I"D:/Dev-Cpp/include" 
+BIN  = win_context_menu.dll
+CXXFLAGS = $(CXXINCS) -DBUILDING_DLL=1   -fno-access-control
+CFLAGS = $(INCS) -DBUILDING_DLL=1   -fno-access-control
+RM = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before win_context_menu.dll all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+DLLWRAP=dllwrap.exe
+DEFFILE=libwin_context_menu.def
+STATICLIB=libwin_context_menu.a
+
+$(BIN): $(LINKOBJ)
+	$(DLLWRAP) --output-def $(DEFFILE) --driver-name c++ --implib $(STATICLIB) $(LINKOBJ) $(LIBS) -o $(BIN)
+
+src/ItemIDList.o: src/ItemIDList.cpp
+	$(CPP) -c src/ItemIDList.cpp -o src/ItemIDList.o $(CXXFLAGS)
+
+src/wscitecm.o: src/wscitecm.cpp
+	$(CPP) -c src/wscitecm.cpp -o src/wscitecm.o $(CXXFLAGS)
+
+src/tinyxml/tinystr.o: src/tinyxml/tinystr.cpp
+	$(CPP) -c src/tinyxml/tinystr.cpp -o src/tinyxml/tinystr.o $(CXXFLAGS)
+
+src/tinyxml/tinyxml.o: src/tinyxml/tinyxml.cpp
+	$(CPP) -c src/tinyxml/tinyxml.cpp -o src/tinyxml/tinyxml.o $(CXXFLAGS)
+
+src/tinyxml/tinyxmlerror.o: src/tinyxml/tinyxmlerror.cpp
+	$(CPP) -c src/tinyxml/tinyxmlerror.cpp -o src/tinyxml/tinyxmlerror.o $(CXXFLAGS)
+
+src/tinyxml/tinyxmlparser.o: src/tinyxml/tinyxmlparser.cpp
+	$(CPP) -c src/tinyxml/tinyxmlparser.cpp -o src/tinyxml/tinyxmlparser.o $(CXXFLAGS)
+
+src/cmsettings.o: src/cmsettings.cpp
+	$(CPP) -c src/cmsettings.cpp -o src/cmsettings.o $(CXXFLAGS)
+
+src/regexp/Matcher.o: src/regexp/Matcher.cpp
+	$(CPP) -c src/regexp/Matcher.cpp -o src/regexp/Matcher.o $(CXXFLAGS)
+
+src/regexp/Pattern.o: src/regexp/Pattern.cpp
+	$(CPP) -c src/regexp/Pattern.cpp -o src/regexp/Pattern.o $(CXXFLAGS)
+
+src/regexp/WCMatcher.o: src/regexp/WCMatcher.cpp
+	$(CPP) -c src/regexp/WCMatcher.cpp -o src/regexp/WCMatcher.o $(CXXFLAGS)
+
+src/regexp/WCPattern.o: src/regexp/WCPattern.cpp
+	$(CPP) -c src/regexp/WCPattern.cpp -o src/regexp/WCPattern.o $(CXXFLAGS)
