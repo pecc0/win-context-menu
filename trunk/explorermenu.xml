@@ -6,10 +6,10 @@ In order your changes to take effect you need to call uninstall.bat and then ins
 -->
 <CustomMenuItems>
     <!-- Add menu itmes here. This is an example MenuItem node:
-<MenuItem >
+<MenuItem filter="{regexp}">
 </MenuItem>
 -->
-<MenuItem>dsads</MenuItem>
-<MenuItem>1</MenuItem>
+<MenuItem filter=".*\.TXT">aaadsads</MenuItem>
+<MenuItem filter=".*\.txt">1</MenuItem>
 <MenuItem>2</MenuItem>
 </CustomMenuItems>

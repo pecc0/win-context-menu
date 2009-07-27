@@ -32,6 +32,6 @@ ContextMenuString ContextMenuString::substring(int start, int end)
 	return result;
 }
 
-	bool ContextMenuString::matches(const ContextMenuString& regexp){
-         return Pattern::matches(regexp.data(), this->data());
- }
+bool ContextMenuString::matches(const ContextMenuString& regexp){
+	return Pattern::matches(regexp.data(), this->data(), Pattern::CASE_INSENSITIVE);
+}

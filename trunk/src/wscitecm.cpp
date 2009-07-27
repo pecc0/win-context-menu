@@ -86,9 +86,9 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 		//MessageBox(0, str.data(), "", 0);
 		ContextMenuSettings::init(str);
 		for (ContextMenuItemsIterator i = ContextMenuSettings::begin(); !i.end(); i++) {
-            ContextMenuString name = i.item().getName();
-            if (name.matches("aaa.*")){
-               MessageBox(0, name.data(), "", 0);
+            ContextMenuString name = "d:\\opa\\bla.txt";
+            if (name.matches(i.item().getFilter())){
+               MessageBox(0, i.item().getName().data(), "", 0);
             }
         }
 		_hModule = hInstance;
