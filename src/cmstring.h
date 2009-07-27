@@ -14,4 +14,6 @@ public:
 	@param end substring end index
 	*/
 	ContextMenuString substring(int start, int end);
+	
+	bool matches(const ContextMenuString& regexp);
 };
