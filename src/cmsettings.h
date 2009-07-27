@@ -4,6 +4,7 @@ public:
 	ContextMenuItem(TiXmlElement* e): elem(e){
 	}
 	ContextMenuString getName();
+	ContextMenuString getFilter();
 	friend class ContextMenuItemsIterator;
 private:
 	TiXmlElement* elem;

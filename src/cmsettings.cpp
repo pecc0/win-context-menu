@@ -87,9 +87,21 @@ ContextMenuString ContextMenuItem::getName()
 	if (elem) {
 		const char * text = elem->GetText();
 		if (text) {
-			result = elem->GetText();
+			result = text;
 		} else {
 			result = "";			
+		}
+	}
+	return result;
+}
+ContextMenuString ContextMenuItem::getFilter(){
+	ContextMenuString result("error");
+	if (elem) {
+		const char * str = elem->Attribute("filter");
+		if (str) {
+			result = str;
+		} else {
+			result = ".*";
 		}
 	}
 	return result;
