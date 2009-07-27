@@ -85,6 +85,9 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 		ContextMenuString str = moduleName;
 		//MessageBox(0, str.data(), "", 0);
 		ContextMenuSettings::init(str);
+		for (ContextMenuItemsIterator i = ContextMenuSettings::begin(); !i.end(); i++) {
+            MessageBox(0, i.item().getName().data(), "", 0);
+        }
 		_hModule = hInstance;
 	}
 	return 1;

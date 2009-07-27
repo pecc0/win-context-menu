@@ -46,15 +46,52 @@ void ContextMenuSettings::init(ContextMenuString& dllFile)
 	
 }
 
+ContextMenuItemsIterator ContextMenuSettings::begin() {
+	ContextMenuItemsIterator result;
+	TiXmlNode* node = 0;
+	TiXmlElement* customMenuItems = 0;
+	TiXmlElement* item = 0;
+	node = configDoc.FirstChild( "CustomMenuItems" );
+	assert( node );
+	customMenuItems = node->ToElement();
+	assert( customMenuItems  ); 
+	item = customMenuItems->FirstChildElement("MenuItem");
+	result.current = ContextMenuItem(item);
+	
+	return result;
+	
+}
+
+
+/***********ContextMenuItemsIterator*************/
 ContextMenuItemsIterator& ContextMenuItemsIterator::operator+ (int i)
 {
-	while (current->elem && i > 0) {
-		current->elem = current->elem->NextSiblingElement("MenuItem");
+	while (current.elem && i > 0) {
+		current.elem = current.elem->NextSiblingElement("MenuItem");
 		i--;
 	}
 	return *this;
 }
+
 ContextMenuItemsIterator& ContextMenuItemsIterator::operator++ (int)
 {
 	return (*this) + 1;
 }
+/***********ContextMenuItemsIterator*************/
+
+
+/***********ContextMenuItem********************/
+ContextMenuString ContextMenuItem::getName()
+{
+	ContextMenuString result("error");
+	if (elem) {
+		const char * text = elem->GetText();
+		if (text) {
+			result = elem->GetText();
+		} else {
+			result = "";			
+		}
+	}
+	return result;
+}
+/***********ContextMenuItem********************/

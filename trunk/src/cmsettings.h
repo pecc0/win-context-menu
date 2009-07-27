@@ -3,6 +3,7 @@ class ContextMenuItem {
 public:
 	ContextMenuItem(TiXmlElement* e): elem(e){
 	}
+	ContextMenuString getName();
 	friend class ContextMenuItemsIterator;
 private:
 	TiXmlElement* elem;
@@ -10,11 +11,14 @@ private:
 
 class ContextMenuItemsIterator {
 public:
+	ContextMenuItemsIterator():current(NULL) {}
 	ContextMenuItemsIterator& operator+ (int i) ;
 	ContextMenuItemsIterator& operator++ (int) ;
+	bool end() { return !current.elem; }
+	ContextMenuItem& item() { return current; }
 	friend class ContextMenuSettings;
 private:
-	ContextMenuItem* current;
+	ContextMenuItem current;
 };
 
 class ContextMenuSettings {
