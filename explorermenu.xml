@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<!-- 
+Use this file to configure your custom Windows explorer context menu items.
+This file is loaded only when you register (install) win_context_menu.dll. 
+In order your changes to take effect you need to call uninstall.bat and then install.bat.
+-->
+<CustomMenuItems>
+    <!-- Add menu itmes here. This is an example MenuItem node:
+<MenuItem >
+</MenuItem>
+-->
+</CustomMenuItems>

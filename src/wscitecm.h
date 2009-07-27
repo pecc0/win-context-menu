@@ -37,7 +37,7 @@ protected:
   LPMALLOC m_pAlloc;
   TCHAR m_szDllDir [MAX_PATH];
 
-  STDMETHODIMP InvokeSciTE(HWND hParent,
+  STDMETHODIMP InvokeProgram(HWND hParent,
     LPCSTR pszWorkingDir,
     LPCSTR pszCmd,
     LPCSTR pszParam,

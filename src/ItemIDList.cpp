@@ -19,6 +19,7 @@
 //#include "StdAfx.h"
 //#include "ShellExt.h"
 #define INC_OLE2
+#define _WIN32_WINNT 0x0500
 
 #include <windows.h>
 #include <windowsx.h>
