@@ -37,18 +37,18 @@ protected:
 	LPMALLOC m_pAlloc;
 	TCHAR m_szDllDir [MAX_PATH];
 	std::vector<ContextMenuItem> m_cmiCurrentMenu;
-    std::vector<ContextMenuString> m_strFiles;
-    WCHAR m_folder[MAX_PATH];
-    
+	std::vector<ContextMenuString> m_strFiles;
+	WCHAR m_folder[MAX_PATH];
+	
 	STDMETHODIMP InvokeProgram(
-    ContextMenuItem mi, 
-HWND hParent, 
-LPCSTR pszWorkingDir, 
-LPCSTR pszCmd, 
-LPCSTR pszParam, 
-int iShowCmd,
-ContextMenuString targetFile,
-ContextMenuString allTargetFiles);
+	ContextMenuItem mi, 
+	HWND hParent, 
+	LPCSTR pszWorkingDir, 
+	LPCSTR pszCmd, 
+	LPCSTR pszParam, 
+	int iShowCmd,
+	ContextMenuString targetFile,
+	ContextMenuString allTargetFiles);
 
 public:
 	CShellExt();

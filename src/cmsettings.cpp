@@ -39,7 +39,7 @@ The most naive approach for implementing this feachure is every time the context
 -->\n\
 </CustomMenuItems>";
 
-void ContextMenuSettings::init(ContextMenuString& dllFile)
+bool ContextMenuSettings::init(ContextMenuString& dllFile)
 {
 	ContextMenuString configFile =  dllFile.substring(0, dllFile.rfind('\\'));
 	configFile += "\\explorermenu.xml";
@@ -53,20 +53,49 @@ void ContextMenuSettings::init(ContextMenuString& dllFile)
 	"DEBUG",
 	MB_OK);
 	*/
+	TiXmlOutStream message;
 	if ( !loadOkay )
 	{
+         configDoc.Clear();
 		configDoc.Parse(emptyMenu);
 		configDoc.SaveFile();
 		
-		TiXmlOutStream message;
-		message<<"Can't parse '"<<configFile.c_str() << "'. New one created. Check it for instructions about how to use this tool";
+		
+		message<<"Can't find '"<<configFile.c_str() << "'. New one created. Check it for instructions about how to use this tool";
 		MessageBox(NULL,
 		message.c_str(),
-		"DEBUG",
+		"Custom Context Menu",
 		MB_OK);
+		
+		
 	}
-	
-	
+	TiXmlNode* node = 0;
+	node = configDoc.FirstChild( "CustomMenuItems" );
+	bool error = false;
+	if (node) {
+		if (!node->ToElement()) {
+			error = true;
+		}
+	} else {
+		error = true;
+	}
+	if (error) {
+		
+		message<<"Can't parse '"<<configFile.c_str() << "'. Should I recreate the file?";
+		
+		if (MessageBox(NULL,
+					message.c_str(),
+					"Custom Context Menu",
+					MB_YESNO) == IDYES)
+		{
+            configDoc.Clear();
+			configDoc.Parse(emptyMenu);
+			configDoc.SaveFile();
+		} else {
+			return false;
+		}
+	}
+	return true;
 }
 
 ContextMenuItemsIterator ContextMenuSettings::begin() {
