@@ -2,14 +2,33 @@
 <!-- 
 Use this file to configure your custom Windows explorer context menu items.
 This file is loaded only when you register (install) win_context_menu.dll. 
-In order your changes to take effect you need to call uninstall.bat and then install.bat.
+In order your changes to take effect you need to call uninstall.bat and then install.bat (or reinstall.bat).
+
+I'm looking for a variant this xml to be loaded in a shared memory, and the win_context_menu.dll to provide a callback method for reloading the xml. 
+The most naive approach for implementing this is every time the context menu is shown, the xml to be read from the disk (but I don't like it :) )
 -->
 <CustomMenuItems>
-    <!-- Add menu itmes here. This is an example MenuItem node:
-<MenuItem filter="{regexp}">
-</MenuItem>
+    <!-- 
+	Add menu items here. This is the MenuItem general schema (TODO: create an xsd)
+	<MenuItem 
+		filter="{regexp}"  Filter if the menu item is "onfile". Default value ".*".  If this filter matches any of the selected files, then the menu item is added into the context menu. 
+		separator="true|false" default fasle
+		ondir="true|false" default false
+		onfile="true|false" default true if ondir=false else false
+		foreach="true|false" Whether the command is executed for each of the selected files, or once for all files. default=false. The command is executed for each of the files that matches the filter regex
+		command="{string}" The executed command. Use %f to specify the first file, %F to specify all files. If foreach is true %f returns the current file
+		user="{username}" Use this if you want the command to be executed with a different privileges. This is only the user name (no domain). Domain might be implemented later
+		pass="{pass}" A password for the user
+	>
+	{name}
+	</MenuItem>
+	
+	Here are some examples:
+	<MenuItem separator="true" ondir="true" onfile="true" />
+	<MenuItem ondir="true" command="cmd" user="lu" pass="pass">Petko's CMD</MenuItem>
+	<MenuItem filter=".*\.TXT" command="notepad %f" foreach="true">notepad all</MenuItem>
+	<MenuItem filter=".*\.txt" command="notepad %f">notepad first</MenuItem>
+	<MenuItem command="C:\Program Files\Notepad++\notepad++.exe %F">Notepad++</MenuItem>
+	<MenuItem separator="true" ondir="true" onfile="true"/>
 -->
-<MenuItem filter=".*\.TXT">aaadsads</MenuItem>
-<MenuItem filter=".*\.txt">1</MenuItem>
-<MenuItem>2</MenuItem>
 </CustomMenuItems>

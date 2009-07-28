@@ -7,12 +7,35 @@ const char* emptyMenu =
 <!-- \n\
 Use this file to configure your custom Windows explorer context menu items.\n\
 This file is loaded only when you register (install) win_context_menu.dll. \n\
-In order your changes to take effect you need to call uninstall.bat and then install.bat.\n\
+In order your changes to take effect you need to call uninstall.bat and then install.bat (or reinstall.bat).\n\
+\n\
+I'm looking for a variant this xml to be loaded in a shared memory, and win_context_menu.dll to provide a callback method for reloading the xml from the disk. \n\
+This way you will not need to restart your explorer every time you make a change in this xml.\n\
+The most naive approach for implementing this feachure is every time the context menu is shown, the xml to be read from the disk (but I don't like it :) )\n\
 -->\n\
 <CustomMenuItems>\n\
-<!-- Add menu itmes here. This is an example MenuItem node:\n\
-<MenuItem >\n\
-</MenuItem>\n\
+<!-- \n\
+	Add menu items here. This is the MenuItem general schema (TODO: create an xsd)\n\
+	<MenuItem \n\
+		filter=\"{regexp}\"  Filter if the menu item is \"onfile\". Default value \".*\".  If this filter matches any of the selected files, then the menu item is added into the context menu. \n\
+		separator=\"true|false\" default fasle\n\
+		ondir=\"true|false\" default false\n\
+		onfile=\"true|false\" default true if ondir=false else false\n\
+		foreach=\"true|false\" Whether the command is executed for each of the selected files, or once for all files. default=false. The command is executed for each of the files that matches the filter regex\n\
+		command=\"{string}\" The executed command. Use %f to specify the first file, %F to specify all files. If foreach is true %f returns the current file\n\
+		user=\"{username}\" Use this if you want the command to be executed with a different privileges. This is only the user name (no domain). Domain might be implemented later\n\
+		pass=\"{pass}\" A password for the user\n\
+	>\n\
+	{name}\n\
+	</MenuItem>\n\
+	\n\
+	Here are some examples:\n\
+	<MenuItem separator=\"true\" ondir=\"true\" onfile=\"true\" />\n\
+	<MenuItem ondir=\"true\" command=\"cmd\" user=\"lu\" pass=\"pass\">Petko's CMD</MenuItem>\n\
+	<MenuItem filter=\".*\\.TXT\" command=\"notepad %f\" foreach=\"true\">notepad all</MenuItem>\n\
+	<MenuItem filter=\".*\\.txt\" command=\"notepad %f\">notepad first</MenuItem>\n\
+	<MenuItem command=\"C:\\Program Files\\Notepad++\\notepad++.exe %F\">Notepad++</MenuItem>\n\
+	<MenuItem separator=\"true\" ondir=\"true\" onfile=\"true\"/>\n\
 -->\n\
 </CustomMenuItems>";
 
@@ -36,7 +59,7 @@ void ContextMenuSettings::init(ContextMenuString& dllFile)
 		configDoc.SaveFile();
 		
 		TiXmlOutStream message;
-		message<<"File '"<<configFile.c_str() << "' not found. New one created. Check it for instructions about how to use this tool";
+		message<<"Can't parse '"<<configFile.c_str() << "'. New one created. Check it for instructions about how to use this tool";
 		MessageBox(NULL,
 		message.c_str(),
 		"DEBUG",
@@ -66,8 +89,9 @@ ContextMenuItemsIterator ContextMenuSettings::begin() {
 /***********ContextMenuItemsIterator*************/
 ContextMenuItemsIterator& ContextMenuItemsIterator::operator+ (int i)
 {
+	
 	while (current.elem && i > 0) {
-		current.elem = current.elem->NextSiblingElement("MenuItem");
+		current = ContextMenuItem(current.elem->NextSiblingElement("MenuItem"));
 		i--;
 	}
 	return *this;
@@ -81,7 +105,17 @@ ContextMenuItemsIterator& ContextMenuItemsIterator::operator++ (int)
 
 
 /***********ContextMenuItem********************/
-ContextMenuString ContextMenuItem::getName()
+
+ContextMenuItem::ContextMenuItem(TiXmlElement* e): elem(e){
+	name = parseName();
+	filter = parseFilter();
+	flags = parseFlags();
+	user = parseUser();
+	pass = parsePass();
+	command = parseCommand();
+}
+
+ContextMenuString ContextMenuItem::parseName()
 {
 	ContextMenuString result("error");
 	if (elem) {
@@ -94,7 +128,7 @@ ContextMenuString ContextMenuItem::getName()
 	}
 	return result;
 }
-ContextMenuString ContextMenuItem::getFilter(){
+ContextMenuString ContextMenuItem::parseFilter(){
 	ContextMenuString result("error");
 	if (elem) {
 		const char * str = elem->Attribute("filter");
@@ -102,6 +136,78 @@ ContextMenuString ContextMenuItem::getFilter(){
 			result = str;
 		} else {
 			result = ".*";
+		}
+	}
+	return result;
+}
+
+ContextMenuString ContextMenuItem::parseUser(){
+	ContextMenuString result("error");
+	if (elem) {
+		const char * str = elem->Attribute("user");
+		if (str) {
+			result = str;
+		} else {
+			result = "";
+		}
+	}
+	return result;
+}
+ContextMenuString ContextMenuItem::parsePass(){
+	ContextMenuString result("error");
+	if (elem) {
+		const char * str = elem->Attribute("pass");
+		if (str) {
+			result = str;
+		} else {
+			result = "";
+		}
+	}
+	return result;
+}
+ContextMenuString ContextMenuItem::parseCommand(){
+	ContextMenuString result("error");
+	if (elem) {
+		const char * str = elem->Attribute("command");
+		if (str) {
+			result = str;
+		} else {
+			result = "";
+		}
+	}
+	return result;
+}
+
+unsigned ContextMenuItem::parseFlags(){
+	unsigned result = MENU_ITEM_ONFILE;
+	if (elem) {
+		const char * str = elem->Attribute("ondir");
+		if (str) {
+			ContextMenuString strondir(str);
+			if (strondir.matches("true")) {
+				result = MENU_ITEM_ONDIR;
+			}
+		}
+		str = elem->Attribute("onfile");
+		if (str) {
+			ContextMenuString stronfile(str);
+			if (stronfile.matches("true")) {
+				result |= MENU_ITEM_ONFILE;
+			}
+		}
+		str = elem->Attribute("separator");
+		if (str) {
+			ContextMenuString obj(str);
+			if (obj.matches("true")) {
+				result |= MENU_ITEM_SEPARATOR;
+			}
+		}
+		str = elem->Attribute("foreach");
+		if (str) {
+			ContextMenuString obj(str);
+			if (obj.matches("true")) {
+				result |= MENU_ITEM_FOREACH;
+			}
 		}
 	}
 	return result;
