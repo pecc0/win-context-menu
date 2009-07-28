@@ -455,13 +455,20 @@ STDMETHODIMP CShellExt::QueryContextMenu(HMENU hMenu, UINT indexMenu, UINT idCmd
 				|| ((mi.getFlags() & MENU_ITEM_ONDIR) && !m_pDataObj)) {
 			if (mi.getFlags() & MENU_ITEM_SEPARATOR) 
 			{
+				if (mi.getPosition() >= 0) {
+					nIndex = mi.getPosition();
+				}
 				InsertMenu(hMenu, nIndex++, MF_SEPARATOR|MF_BYPOSITION, 0, NULL);   
 			} 
 			else 
 			{
+				
 				if ((mi.getFlags() & MENU_ITEM_ONDIR)
 						|| !filtered
 						) {
+					if (mi.getPosition() >= 0) {
+						nIndex = mi.getPosition();
+					}
 					InsertMenu(hMenu, nIndex, MF_STRING|MF_BYPOSITION, idCmd++, mi.getName().c_str());
 					m_cmiCurrentMenu.push_back(mi);
 					/*

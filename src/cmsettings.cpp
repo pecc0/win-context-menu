@@ -25,13 +25,14 @@ The most naive approach for implementing this feachure is every time the context
 		command=\"{string}\" The executed command. Use %f to specify the first file, %F to specify all files. If foreach is true %f returns the current file\n\
 		user=\"{username}\" Use this if you want the command to be executed with a different privileges. This is only the user name (no domain). Domain might be implemented later\n\
 		pass=\"{pass}\" A password for the user\n\
+		position=\"{number}\" An explicit position for the menu item\n\
 	>\n\
 	{name}\n\
 	</MenuItem>\n\
 	\n\
 	Here are some examples:\n\
 	<MenuItem separator=\"true\" ondir=\"true\" onfile=\"true\" />\n\
-	<MenuItem ondir=\"true\" command=\"cmd\" user=\"lu\" pass=\"pass\">Petko's CMD</MenuItem>\n\
+	<MenuItem position='0' ondir=\"true\" command=\"cmd\" user=\"lu\" pass=\"pass\">Petko's CMD</MenuItem>\n\
 	<MenuItem filter=\".*\\.TXT\" command=\"notepad %f\" foreach=\"true\">notepad all</MenuItem>\n\
 	<MenuItem filter=\".*\\.txt\" command=\"notepad %f\">notepad first</MenuItem>\n\
 	<MenuItem command=\"C:\\Program Files\\Notepad++\\notepad++.exe %F\">Notepad++</MenuItem>\n\
@@ -56,7 +57,7 @@ bool ContextMenuSettings::init(ContextMenuString& dllFile)
 	TiXmlOutStream message;
 	if ( !loadOkay )
 	{
-         configDoc.Clear();
+		configDoc.Clear();
 		configDoc.Parse(emptyMenu);
 		configDoc.SaveFile();
 		
@@ -88,7 +89,7 @@ bool ContextMenuSettings::init(ContextMenuString& dllFile)
 					"Custom Context Menu",
 					MB_YESNO) == IDYES)
 		{
-            configDoc.Clear();
+			configDoc.Clear();
 			configDoc.Parse(emptyMenu);
 			configDoc.SaveFile();
 		} else {
@@ -142,6 +143,12 @@ ContextMenuItem::ContextMenuItem(TiXmlElement* e): elem(e){
 	user = parseUser();
 	pass = parsePass();
 	command = parseCommand();
+	ContextMenuString str = parseAttribute(ContextMenuString("position"));
+	if (str.size() > 0){
+		position = atoi(str.data());
+	} else {
+		position = -1;
+	}
 }
 
 ContextMenuString ContextMenuItem::parseName()
@@ -198,6 +205,19 @@ ContextMenuString ContextMenuItem::parseCommand(){
 	ContextMenuString result("error");
 	if (elem) {
 		const char * str = elem->Attribute("command");
+		if (str) {
+			result = str;
+		} else {
+			result = "";
+		}
+	}
+	return result;
+}
+
+ContextMenuString ContextMenuItem::parseAttribute(const ContextMenuString& attrname){
+	ContextMenuString result("error");
+	if (elem) {
+		const char * str = elem->Attribute(attrname.data());
 		if (str) {
 			result = str;
 		} else {
