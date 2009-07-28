@@ -8,8 +8,8 @@ RES  =
 OBJ  = src/ItemIDList.o src/wscitecm.o src/tinyxml/tinystr.o src/tinyxml/tinyxml.o src/tinyxml/tinyxmlerror.o src/tinyxml/tinyxmlparser.o src/cmsettings.o src/regexp/Matcher.o src/regexp/Pattern.o src/regexp/WCMatcher.o src/regexp/WCPattern.o src/cmstring.o $(RES)
 LINKOBJ  = src/ItemIDList.o src/wscitecm.o src/tinyxml/tinystr.o src/tinyxml/tinyxml.o src/tinyxml/tinyxmlerror.o src/tinyxml/tinyxmlparser.o src/cmsettings.o src/regexp/Matcher.o src/regexp/Pattern.o src/regexp/WCMatcher.o src/regexp/WCPattern.o src/cmstring.o $(RES)
 LIBS =  -L"D:/Dev-Cpp/lib" --add-stdcall-alias  --export-all-symbols -lole32 -lshlwapi -luuid  
-INCS = 
-CXXINCS =  -I"D:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"D:/Dev-Cpp/include/c++/3.4.2/bits"  -I"D:/Dev-Cpp/include/c++/3.4.2/backward"  -I"D:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"D:/Dev-Cpp/include/c++/3.4.2"  -I"D:/Dev-Cpp/include" 
+INCS =  -I"D:/Dev-Cpp/include" 
+CXXINCS =  -I"D:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"D:/Dev-Cpp/include/c++/3.4.2/backward"  -I"D:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"D:/Dev-Cpp/include/c++/3.4.2"  -I"D:/Dev-Cpp/include" 
 BIN  = win_context_menu.dll
 CXXFLAGS = $(CXXINCS) -DBUILDING_DLL=1   -fno-access-control
 CFLAGS = $(INCS) -DBUILDING_DLL=1   -fno-access-control

@@ -14,6 +14,7 @@ public:
 	const ContextMenuString& getUser() { return user; }
 	const ContextMenuString& getPass() { return pass; }
 	const ContextMenuString& getCommand() { return command; }
+	const int getPosition() { return position; }
 	unsigned getFlags() { return flags; }
 	//friend class ContextMenuItemsIterator;
 private:
@@ -21,14 +22,17 @@ private:
 	ContextMenuString parseFilter();
 	ContextMenuString parseUser();
 	ContextMenuString parsePass();
-    ContextMenuString parseCommand();
+	ContextMenuString parseCommand();
+	ContextMenuString parseAttribute(const ContextMenuString& attrname);
+	
 	unsigned parseFlags();
 	TiXmlElement* elem;
 	ContextMenuString name;
 	ContextMenuString filter;
 	ContextMenuString user;
 	ContextMenuString pass;
-    ContextMenuString command;
+	ContextMenuString command;
+	int position;
 	unsigned flags;
 };
 
