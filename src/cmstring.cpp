@@ -32,6 +32,21 @@ ContextMenuString ContextMenuString::substring(int start, int end)
 	return result;
 }
 
+void ContextMenuString::toWideChar(WCHAR* result) const
+{
+	MultiByteToWideChar(
+	CP_ACP, 0,
+	data(),
+	size(),
+	result,
+	size());
+	result[size()] = 0;
+}
+
+bool ContextMenuString::matches(const char* regexp){
+	return Pattern::matches(regexp, this->data(), Pattern::CASE_INSENSITIVE);
+}
+
 bool ContextMenuString::matches(const ContextMenuString& regexp){
-	return Pattern::matches(regexp.data(), this->data(), Pattern::CASE_INSENSITIVE);
+	return ContextMenuString::matches(regexp.data());
 }

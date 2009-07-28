@@ -1,5 +1,6 @@
 #pragma once
 #include "tinyxml/tinyxml.h"
+#include <windows.h>
 class ContextMenuString : public TiXmlString {
 public:
 	ContextMenuString() {}
@@ -14,6 +15,10 @@ public:
 	@param end substring end index
 	*/
 	ContextMenuString substring(int start, int end);
+	
+	void toWideChar(WCHAR* result) const;
+	
+	bool matches(const char* regexp);
 	
 	bool matches(const ContextMenuString& regexp);
 };

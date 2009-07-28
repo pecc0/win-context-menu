@@ -23,7 +23,8 @@
 #include <shlobj.h>
 
 #include <userenv.h>
-
+#include <vector>
+#include <string>
 
 #define GUID_SIZE 128
 #define ARRAYSIZE(a) (sizeof(a)/sizeof(a[0]))
@@ -35,13 +36,18 @@
 #define INITGUID
 #include <initguid.h>
 #include <shlguid.h>
+
+
 #include "resource.h"
+
+#include "cmstring.h"
+#include "cmsettings.h"
+
 #include "wscitecm.h"
 
 #include "ItemIDList.h"
 
-#include "cmstring.h"
-#include "cmsettings.h"
+#include "regexp/regexp/Pattern.h"
 
 #pragma data_seg()
 
@@ -77,20 +83,32 @@ void MsgBoxError(LPTSTR);
 //---------------------------------------------------------------------------
 extern "C" int APIENTRY
 DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
-	
-	
+
 	if (dwReason == DLL_PROCESS_ATTACH) {
 		TCHAR moduleName[MAX_PATH];
 		GetModuleFileName(hInstance, moduleName, MAX_PATH);
 		ContextMenuString str = moduleName;
 		//MessageBox(0, str.data(), "", 0);
 		ContextMenuSettings::init(str);
-		/*for (ContextMenuItemsIterator i = ContextMenuSettings::begin(); !i.end(); i++) {
-            ContextMenuString name = "d:\\opa\\bla.txt";
-            if (name.matches(i.item().getFilter())){
-               //MessageBox(0, i.item().getName().data(), "", 0);
-            }
-        }*/
+		/*
+		for (ContextMenuItemsIterator i = ContextMenuSettings::begin(); !i.end(); i++) {
+			ContextMenuString name = "d:\\opa\\bla.txt";
+			if (name.matches(i.item().getFilter())){
+				MessageBox(0, i.item().getName().data(), "", 0);
+			}
+		}
+		*/
+		//ContextMenuString s1("notepad %F");
+		//ContextMenuString s2("C:\\a\\w\\b");
+		//ContextMenuString s3("C:\\a\\w\\b");
+		
+		//std::string result = Pattern::replace("%f", std::string(s1.data()), Pattern::replace("\\\\", std::string(s2.data()), "\\\\\\\\"));
+
+
+		//result = Pattern::replace("%F", result, Pattern::replace("\\\\", std::string(s3.data()), "\\\\\\\\"));
+		//ContextMenuString cmd(result.data());
+		//MessageBox(0,cmd.data(),"",0);
+		
 		_hModule = hInstance;
 	}
 	return 1;
@@ -356,7 +374,7 @@ STDMETHODIMP_(ULONG) CShellExt::Release() {
 	return 0L;
 }
 
-char m_folder[500];
+
 
 STDMETHODIMP CShellExt::Initialize(LPCITEMIDLIST pIDFolder, LPDATAOBJECT pDataObj, HKEY hRegKey) {
 
@@ -372,7 +390,17 @@ STDMETHODIMP CShellExt::Initialize(LPCITEMIDLIST pIDFolder, LPDATAOBJECT pDataOb
 	if (pIDFolder)
 	{
 		ItemIDList list(pIDFolder);
-		list.toString(m_folder);
+		char buf[MAX_PATH];
+		list.toString(buf);
+		int len = strlen(buf);
+		MultiByteToWideChar(
+		CP_ACP, 0,
+		buf,
+		len,
+		m_folder,
+		MAX_PATH);
+		m_folder[len] = 0;
+		
 	}
 	return NOERROR;
 }
@@ -381,21 +409,10 @@ STDMETHODIMP CShellExt::QueryContextMenu(HMENU hMenu, UINT indexMenu, UINT idCmd
 	UINT idCmd = idCmdFirst;
 	BOOL bAppendItems=TRUE;
 	TCHAR message[200];
-	wsprintf(message, "QueryContextMenu indexMenu %d | idCmdFirst %d | idCmdLast %d ", indexMenu, idCmdFirst, uFlags);
+	TCHAR szFileUserClickedOn[MAX_PATH];
+	//wsprintf(message, "QueryContextMenu indexMenu %d | idCmdFirst %d | idCmdLast %d ", indexMenu, idCmdFirst, uFlags);
 	
-	MessageBox(0,message,"",0);
-
-#ifdef COMMAND_PROMPT
-	char szItemSciTE[100]="Petko's CMD";
-#else //#ifdef COMMAND_PROMPT
-	#ifdef COMPARE_WITH_SVN
-	char szItemSciTE[100]="Sravnqvane s SVN";
-	#else
-	char szItemSciTE[100]="Otvarqne s ";
-	strcat(szItemSciTE, szShellExtensionTitle);
-	#endif
-#endif //#ifdef COMMAND_PROMPT
-
+	//MessageBox(0,message,"",0);
 
 	FORMATETC fmte = {
 		CF_HDROP,
@@ -406,49 +423,57 @@ STDMETHODIMP CShellExt::QueryContextMenu(HMENU hMenu, UINT indexMenu, UINT idCmd
 	};
 
 	UINT nIndex = indexMenu;
-	
-    InsertMenu(hMenu, nIndex++, MF_SEPARATOR|MF_BYPOSITION, 0, NULL); 
-		InsertMenu(hMenu, nIndex, MF_STRING|MF_BYPOSITION, idCmd++, szItemSciTE);
-		if (m_hSciteBmp) {
-			SetMenuItemBitmaps (hMenu, nIndex, MF_BYPOSITION, m_hSciteBmp, m_hSciteBmp);
-		}
-		nIndex++;
-		InsertMenu(hMenu, nIndex, MF_SEPARATOR|MF_BYPOSITION, 0, NULL); 
-		
-	if (!m_pDataObj)
+	m_strFiles.clear();
+	if (m_pDataObj)
 	{
-		MessageBox(0,"!m_pDataObj","",0);
-		
-		return ResultFromShort(idCmd-idCmdFirst);
-	}
-	HRESULT hres = m_pDataObj->GetData(&fmte, &m_stgMedium);
-   
-    MessageBox(0,"m_pDataObj","",0);
-    
-	if (SUCCEEDED(hres)) {
-		if (m_stgMedium.hGlobal)
-		m_cbFiles = DragQueryFile((HDROP)m_stgMedium.hGlobal, (UINT)-1, 0, 0);
-	}
+		HRESULT hres = m_pDataObj->GetData(&fmte, &m_stgMedium);
 
-	return ResultFromShort(idCmd-idCmdFirst);
-}
-
-STDMETHODIMP CShellExt::InvokeCommand(LPCMINVOKECOMMANDINFO lpcmi) {
-	HRESULT hr = E_INVALIDARG;
-
-	if (!HIWORD(lpcmi->lpVerb)) {
-                                
-		UINT idCmd = LOWORD(lpcmi->lpVerb);
-		TCHAR message[200];
-		wsprintf(message, "idCmd %d", idCmd);
-	MessageBox(0,message,"",0);
-		switch(idCmd) {
-		case 0:
-			hr = InvokeProgram(lpcmi->hwnd, lpcmi->lpDirectory, lpcmi->lpVerb, lpcmi->lpParameters, lpcmi->nShow);
-			break;
+		if (SUCCEEDED(hres)) {
+			if (m_stgMedium.hGlobal) {
+				m_cbFiles = DragQueryFile((HDROP)m_stgMedium.hGlobal, (UINT)-1, 0, 0);
+			}
+		}
+		for (int i = 0; i < m_cbFiles; i++) {
+			DragQueryFile((HDROP)m_stgMedium.hGlobal, i, szFileUserClickedOn, MAX_PATH);
+			ContextMenuString fname(szFileUserClickedOn);
+			m_strFiles.push_back(fname);
+			
 		}
 	}
-	return hr;
+	m_cmiCurrentMenu.clear();
+	for (ContextMenuItemsIterator i = ContextMenuSettings::begin(); !i.end(); i++) {
+		ContextMenuItem mi = i.item();
+		bool filtered = true;
+		for (std::vector<ContextMenuString>::iterator it = m_strFiles.begin(); it != m_strFiles.end(); it++) {
+			if ((*it).matches(mi.getFilter())) {
+				filtered = false;
+			}                          
+		}
+		if (((mi.getFlags() & MENU_ITEM_ONFILE) && m_pDataObj)
+				|| ((mi.getFlags() & MENU_ITEM_ONDIR) && !m_pDataObj)) {
+			if (mi.getFlags() & MENU_ITEM_SEPARATOR) 
+			{
+				InsertMenu(hMenu, nIndex++, MF_SEPARATOR|MF_BYPOSITION, 0, NULL);   
+			} 
+			else 
+			{
+				if ((mi.getFlags() & MENU_ITEM_ONDIR)
+						|| !filtered
+						) {
+					InsertMenu(hMenu, nIndex, MF_STRING|MF_BYPOSITION, idCmd++, mi.getName().c_str());
+					m_cmiCurrentMenu.push_back(mi);
+					/*
+				if (m_hSciteBmp) {
+					SetMenuItemBitmaps (hMenu, nIndex, MF_BYPOSITION, m_hSciteBmp, m_hSciteBmp);
+				}
+				*/
+					nIndex++;
+				}
+			}
+		}
+	}
+	
+	return ResultFromShort(idCmd-idCmdFirst);
 }
 STDMETHODIMP CShellExt::GetCommandString(UINT idCmd, UINT uFlags, UINT FAR *reserved, LPSTR pszName, UINT cchMax) {
 	if (uFlags == GCS_HELPTEXT && cchMax > 35) {
@@ -456,20 +481,117 @@ STDMETHODIMP CShellExt::GetCommandString(UINT idCmd, UINT uFlags, UINT FAR *rese
 	}
 	return NOERROR;
 }
-
-STDMETHODIMP CShellExt::InvokeProgram(HWND hParent, LPCSTR pszWorkingDir, LPCSTR pszCmd, LPCSTR pszParam, int iShowCmd) {
-	TCHAR szFileUserClickedOn[MAX_PATH];
-	TCHAR message[200];
-	//TCHAR filesList = new TCHAR[MAX_PATH * m_cbFiles];
-	TiXmlString str;
-	wsprintf(message, "InvokeProgram pszCmd %s | pszWorkingDir %s | pszParam %s | m_cbFiles %d", pszCmd, pszWorkingDir, pszParam, m_cbFiles);
-	MessageBox(0,message,"",0);
-	LPTSTR pszCommand;
-	int i;
-	for (i = 0; i < m_cbFiles; i++) {
-		DragQueryFile((HDROP)m_stgMedium.hGlobal, i, szFileUserClickedOn, MAX_PATH);
-		
-	}
+STDMETHODIMP CShellExt::InvokeCommand(LPCMINVOKECOMMANDINFO lpcmi) {
+	HRESULT hr = E_INVALIDARG;
 	
+	
+	if (!HIWORD(lpcmi->lpVerb)) {
+		UINT idCmd = LOWORD(lpcmi->lpVerb);
+		ContextMenuItem mi = m_cmiCurrentMenu[idCmd];
+		ContextMenuString allFiles("");
+		
+		for (std::vector<ContextMenuString>::iterator it = m_strFiles.begin(); it != m_strFiles.end(); it++) {
+			allFiles += " \"";
+			allFiles += (*it);
+			allFiles += "\"";                  
+		}
+		if (mi.getFlags() & MENU_ITEM_FOREACH) {
+			for (std::vector<ContextMenuString>::iterator it = m_strFiles.begin(); it != m_strFiles.end(); it++) {
+				if ((mi.getFlags() & MENU_ITEM_ONDIR) || (*it).matches(mi.getFilter())) {
+					hr = InvokeProgram(mi, lpcmi->hwnd, lpcmi->lpDirectory, lpcmi->lpVerb, lpcmi->lpParameters, 
+					lpcmi->nShow, (*it), allFiles);
+				}
+			}
+		} else {
+			int i;
+			for (i= 0; i < m_strFiles.size(); i++) {
+				if(m_strFiles[i].matches(mi.getFilter())){
+					break;
+				}
+			}
+			hr = InvokeProgram(mi, lpcmi->hwnd, lpcmi->lpDirectory, lpcmi->lpVerb, lpcmi->lpParameters, lpcmi->nShow, 
+			m_strFiles.size() > 0 ? m_strFiles[i] : allFiles, allFiles);
+		}
+	}
+	return hr;
+}
+
+
+STDMETHODIMP CShellExt::InvokeProgram(
+ContextMenuItem mi, 
+HWND hParent, 
+LPCSTR pszWorkingDir, 
+LPCSTR pszCmd, 
+LPCSTR pszParam, 
+int iShowCmd,
+ContextMenuString targetFile,
+ContextMenuString allTargetFiles
+) {
+	
+	
+	PROCESS_INFORMATION pi;
+	STARTUPINFOW si;
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_SHOW;
+	
+	
+	
+	//
+	//
+	//MessageBox(0,message,"",0);
+	//ContextMenuString cmd = ;
+	
+	std::string result = Pattern::replace("%f", std::string(mi.getCommand().data()), 
+	Pattern::replace("\\\\", std::string(targetFile.data()), "\\\\\\\\"));
+	
+	result = Pattern::replace("%F", result, 
+	Pattern::replace("\\\\", std::string(allTargetFiles.data()), "\\\\\\\\"));
+	ContextMenuString cmd(result.data());
+	WCHAR* wccommand = new WCHAR[cmd.size() + 1];
+	cmd.toWideChar(wccommand);
+	
+	if (mi.getUser().size() > 0) 
+	{
+		WCHAR* wcuser = new WCHAR[mi.getUser().size() + 1];
+		WCHAR* wcpass = new WCHAR[mi.getPass().size() + 1];
+		
+		mi.getUser().toWideChar(wcuser);
+		mi.getPass().toWideChar(wcpass);
+		
+		//MessageBoxW(hParent, m_folder, L"aa", MB_OK);
+		
+		if (!CreateProcessWithLogonW(wcuser, L"", wcpass, 0,
+					NULL, wccommand, 0, NULL, m_folder, &si, &pi)
+				)
+		{
+			TCHAR message[200];
+			wsprintf(message, "Failed to start \n\
+							%s\n\
+							user:%s", cmd.data(), mi.getUser().data());
+			MessageBox(hParent,
+			message,
+			"Custom Context Menu",
+			MB_OK);
+		}
+		delete[] wcuser;
+		delete[] wcpass;
+		delete[] wccommand;
+		
+	} else {
+		if (!CreateProcessW (NULL, wccommand, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+			TCHAR message[200];
+			wsprintf(message, "Failed to start \n\
+							%s", cmd.data());
+			
+			MessageBox(hParent,
+			message,
+			"Custom Context Menu",
+			MB_OK);
+			
+		}
+	}
+
 	return NOERROR;
 }
