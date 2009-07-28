@@ -85,12 +85,12 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 		ContextMenuString str = moduleName;
 		//MessageBox(0, str.data(), "", 0);
 		ContextMenuSettings::init(str);
-		for (ContextMenuItemsIterator i = ContextMenuSettings::begin(); !i.end(); i++) {
+		/*for (ContextMenuItemsIterator i = ContextMenuSettings::begin(); !i.end(); i++) {
             ContextMenuString name = "d:\\opa\\bla.txt";
             if (name.matches(i.item().getFilter())){
-               MessageBox(0, i.item().getName().data(), "", 0);
+               //MessageBox(0, i.item().getName().data(), "", 0);
             }
-        }
+        }*/
 		_hModule = hInstance;
 	}
 	return 1;
@@ -359,6 +359,8 @@ STDMETHODIMP_(ULONG) CShellExt::Release() {
 char m_folder[500];
 
 STDMETHODIMP CShellExt::Initialize(LPCITEMIDLIST pIDFolder, LPDATAOBJECT pDataObj, HKEY hRegKey) {
+
+	
 	HRESULT hres = 0;
 	if (m_pDataObj)
 	m_pDataObj->Release();
@@ -378,7 +380,10 @@ STDMETHODIMP CShellExt::Initialize(LPCITEMIDLIST pIDFolder, LPDATAOBJECT pDataOb
 STDMETHODIMP CShellExt::QueryContextMenu(HMENU hMenu, UINT indexMenu, UINT idCmdFirst, UINT idCmdLast, UINT uFlags) {
 	UINT idCmd = idCmdFirst;
 	BOOL bAppendItems=TRUE;
-	//MessageBox(0,"QueryContextMenu","",0);
+	TCHAR message[200];
+	wsprintf(message, "QueryContextMenu indexMenu %d | idCmdFirst %d | idCmdLast %d ", indexMenu, idCmdFirst, uFlags);
+	
+	MessageBox(0,message,"",0);
 
 #ifdef COMMAND_PROMPT
 	char szItemSciTE[100]="Petko's CMD";
@@ -400,36 +405,29 @@ STDMETHODIMP CShellExt::QueryContextMenu(HMENU hMenu, UINT indexMenu, UINT idCmd
 		TYMED_HGLOBAL
 	};
 
-	UINT nIndex = 0;
-
-	if (!m_pDataObj)
-	{
-		//MessageBox(0,"!m_pDataObj","",0);
-		
-		
-		InsertMenu(hMenu, nIndex++, MF_STRING|MF_BYPOSITION, idCmd++, szItemSciTE);
-		InsertMenu(hMenu, nIndex, MF_SEPARATOR|MF_BYPOSITION, 0, NULL); 
-		
+	UINT nIndex = indexMenu;
+	
+    InsertMenu(hMenu, nIndex++, MF_SEPARATOR|MF_BYPOSITION, 0, NULL); 
+		InsertMenu(hMenu, nIndex, MF_STRING|MF_BYPOSITION, idCmd++, szItemSciTE);
 		if (m_hSciteBmp) {
 			SetMenuItemBitmaps (hMenu, nIndex, MF_BYPOSITION, m_hSciteBmp, m_hSciteBmp);
 		}
-
+		nIndex++;
+		InsertMenu(hMenu, nIndex, MF_SEPARATOR|MF_BYPOSITION, 0, NULL); 
+		
+	if (!m_pDataObj)
+	{
+		MessageBox(0,"!m_pDataObj","",0);
+		
 		return ResultFromShort(idCmd-idCmdFirst);
-
-		return NOERROR;
 	}
 	HRESULT hres = m_pDataObj->GetData(&fmte, &m_stgMedium);
-
+   
+    MessageBox(0,"m_pDataObj","",0);
+    
 	if (SUCCEEDED(hres)) {
 		if (m_stgMedium.hGlobal)
 		m_cbFiles = DragQueryFile((HDROP)m_stgMedium.hGlobal, (UINT)-1, 0, 0);
-	}
-
-
-	InsertMenu(hMenu, nIndex, MF_STRING|MF_BYPOSITION, idCmd++, szItemSciTE);
-
-	if (m_hSciteBmp) {
-		SetMenuItemBitmaps (hMenu, nIndex, MF_BYPOSITION, m_hSciteBmp, m_hSciteBmp);
 	}
 
 	return ResultFromShort(idCmd-idCmdFirst);
@@ -439,7 +437,11 @@ STDMETHODIMP CShellExt::InvokeCommand(LPCMINVOKECOMMANDINFO lpcmi) {
 	HRESULT hr = E_INVALIDARG;
 
 	if (!HIWORD(lpcmi->lpVerb)) {
+                                
 		UINT idCmd = LOWORD(lpcmi->lpVerb);
+		TCHAR message[200];
+		wsprintf(message, "idCmd %d", idCmd);
+	MessageBox(0,message,"",0);
 		switch(idCmd) {
 		case 0:
 			hr = InvokeProgram(lpcmi->hwnd, lpcmi->lpDirectory, lpcmi->lpVerb, lpcmi->lpParameters, lpcmi->nShow);
@@ -457,17 +459,17 @@ STDMETHODIMP CShellExt::GetCommandString(UINT idCmd, UINT uFlags, UINT FAR *rese
 
 STDMETHODIMP CShellExt::InvokeProgram(HWND hParent, LPCSTR pszWorkingDir, LPCSTR pszCmd, LPCSTR pszParam, int iShowCmd) {
 	TCHAR szFileUserClickedOn[MAX_PATH];
+	TCHAR message[200];
 	//TCHAR filesList = new TCHAR[MAX_PATH * m_cbFiles];
 	TiXmlString str;
-	
+	wsprintf(message, "InvokeProgram pszCmd %s | pszWorkingDir %s | pszParam %s | m_cbFiles %d", pszCmd, pszWorkingDir, pszParam, m_cbFiles);
+	MessageBox(0,message,"",0);
 	LPTSTR pszCommand;
-	UINT i;
+	int i;
 	for (i = 0; i < m_cbFiles; i++) {
 		DragQueryFile((HDROP)m_stgMedium.hGlobal, i, szFileUserClickedOn, MAX_PATH);
 		
 	}
-	TCHAR message[200];
-	wsprintf(message, "pszCmd %s | pszWorkingDir %s | pszParam %s ", pszCmd, pszWorkingDir, pszParam);
-	MessageBox(0,message,"",0);
+	
 	return NOERROR;
 }
