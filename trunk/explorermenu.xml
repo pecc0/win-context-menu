@@ -4,8 +4,9 @@ Use this file to configure your custom Windows explorer context menu items.
 This file is loaded only when you register (install) win_context_menu.dll. 
 In order your changes to take effect you need to call uninstall.bat and then install.bat (or reinstall.bat).
 
-I'm looking for a variant this xml to be loaded in a shared memory, and the win_context_menu.dll to provide a callback method for reloading the xml. 
-The most naive approach for implementing this is every time the context menu is shown, the xml to be read from the disk (but I don't like it :) )
+I'm looking for a variant this xml to be loaded in a shared memory, and win_context_menu.dll to provide a callback method for reloading the xml from the disk. 
+This way you will not need to restart your explorer every time you make a change in this xml.
+The most naive approach for implementing this feachure is every time the context menu is shown, the xml to be read from the disk (but I don't like it :) )
 -->
 <CustomMenuItems>
     <!-- 

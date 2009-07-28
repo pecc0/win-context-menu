@@ -89,7 +89,9 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 		GetModuleFileName(hInstance, moduleName, MAX_PATH);
 		ContextMenuString str = moduleName;
 		//MessageBox(0, str.data(), "", 0);
-		ContextMenuSettings::init(str);
+		if (!ContextMenuSettings::init(str)) {
+			return FALSE;
+		}
 		/*
 		for (ContextMenuItemsIterator i = ContextMenuSettings::begin(); !i.end(); i++) {
 			ContextMenuString name = "d:\\opa\\bla.txt";
@@ -386,7 +388,7 @@ STDMETHODIMP CShellExt::Initialize(LPCITEMIDLIST pIDFolder, LPDATAOBJECT pDataOb
 		m_pDataObj = pDataObj;
 		pDataObj->AddRef();
 	}
-
+	m_folder[0] = 0;
 	if (pIDFolder)
 	{
 		ItemIDList list(pIDFolder);
@@ -580,7 +582,7 @@ ContextMenuString allTargetFiles
 		delete[] wccommand;
 		
 	} else {
-		if (!CreateProcessW (NULL, wccommand, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+		if (!CreateProcessW (NULL, wccommand, NULL, NULL, FALSE, 0, NULL, m_folder, &si, &pi)) {
 			TCHAR message[200];
 			wsprintf(message, "Failed to start \n\
 							%s", cmd.data());

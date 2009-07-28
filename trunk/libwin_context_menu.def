@@ -1,4 +1,4 @@
-; dlltool --base-file C:\DOCUME~1\PetkoP\LOCALS~1\Temp/cca03268.base --output-exp win_context_menu.exp --dllname win_context_menu.dll --output-def libwin_context_menu.def --add-stdcall-alias --exclude-symbol=DllMainCRTStartup@12 --def C:\DOCUME~1\PetkoP\LOCALS~1\Temp/cca03268.def --output-lib libwin_context_menu.a
+; dlltool --base-file C:\DOCUME~1\PetkoP\LOCALS~1\Temp/cca02356.base --output-exp win_context_menu.exp --dllname win_context_menu.dll --output-def libwin_context_menu.def --add-stdcall-alias --exclude-symbol=DllMainCRTStartup@12 --def C:\DOCUME~1\PetkoP\LOCALS~1\Temp/cca02356.def --output-lib libwin_context_menu.a
 EXPORTS
 	CLSID_ShellExtension @ 1 DATA
 	DllCanUnloadNow = DllCanUnloadNow@0 @ 2

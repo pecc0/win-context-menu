@@ -46,7 +46,7 @@ private:
 
 class ContextMenuSettings {
 public:
-	static void init(ContextMenuString& dllFile); 
+	static bool init(ContextMenuString& dllFile); 
 	
 	static TiXmlDocument configDoc;
 	
