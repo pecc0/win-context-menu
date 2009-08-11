@@ -27,6 +27,7 @@ ContextMenuString ContextMenuString::substring(int start, int end)
 	}
 	char* buf = new char [end - start + 1];
 	strncpy(buf, c_str() + start, end - start);
+	buf[end - start] = 0;
 	ContextMenuString result(buf);
 	delete[] buf;
 	return result;
